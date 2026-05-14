@@ -1,0 +1,25 @@
+# ── Dataset ───────────────────────────────────────────────────────────────
+# Ham CSV ve notebook tarafından üretilen tüm işlenmiş dosyalar
+data/IMDB_Dataset.csv
+data/*.npy
+data/vocab.pkl
+
+# ── Model checkpoint'leri ─────────────────────────────────────────────────
+# .pt dosyaları büyük olabilir; .gitkeep dizini tutmaya devam eder
+checkpoints/*.pt
+
+# ── Python cache ─────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+
+# ── Test/araç cache'leri ─────────────────────────────────────────────────
+.pytest_cache/
+.hypothesis/
+
+# ── Editör/IDE ayarları ──────────────────────────────────────────────────
+.vscode/
+.kiro/
+
+# ── macOS sistem dosyaları ───────────────────────────────────────────────
+.DS_Store
