@@ -104,15 +104,12 @@ class SentimentLSTM(nn.Module):
         num_layers: int = 1,
         dropout: float = 0.5,
         padding_idx: int = 0,
+        use_batch_norm: bool = True,
     ) -> None:
         super().__init__()
 
         # ------------------------------------------------------------------
         # Layer 1: Embedding
-        # Maps each integer token index to a dense vector of size
-        # ``embedding_dim``.  ``padding_idx=padding_idx`` ensures the PAD
-        # token always produces a zero vector and is excluded from gradient
-        # updates, so it never "learns" a meaningful representation.
         # ------------------------------------------------------------------
         self.embedding = nn.Embedding(
             num_embeddings=vocab_size,
@@ -122,15 +119,10 @@ class SentimentLSTM(nn.Module):
 
         # ------------------------------------------------------------------
         # Layer 2: LSTM
-        # Processes the sequence of embeddings and produces a hidden state at
-        # every time step.  We only use the *final* hidden state for
-        # classification, but PyTorch computes all of them internally.
-        #
         # ``batch_first=True``  → input shape is (batch, seq_len, embedding_dim)
-        # ``dropout``           → inter-layer dropout; only valid when
-        #                         num_layers > 1 (guarded below to avoid warning)
+        # inter-layer dropout only valid when num_layers > 1
         # ------------------------------------------------------------------
-        lstm_dropout = dropout if num_layers > 1 else 0  # guard: no dropout for single-layer LSTM
+        lstm_dropout = dropout if num_layers > 1 else 0
         self.lstm = nn.LSTM(
             input_size=embedding_dim,
             hidden_size=hidden_size,
@@ -140,19 +132,20 @@ class SentimentLSTM(nn.Module):
         )
 
         # ------------------------------------------------------------------
-        # Layer 3: Dropout
-        # Applied to the final hidden state (h_n[-1]) before the linear
-        # projection.  During training, randomly zeros ``dropout`` fraction of
-        # the hidden units, forcing the network to learn redundant
-        # representations and reducing overfitting.
+        # Layer 3 (optional): Batch Normalisation
+        # Normalises the final hidden state across the batch before the
+        # linear layer.  Stabilises training, reduces internal covariate
+        # shift, and acts as a mild regulariser.
+        # ------------------------------------------------------------------
+        self.batch_norm = nn.BatchNorm1d(hidden_size) if use_batch_norm else None
+
+        # ------------------------------------------------------------------
+        # Layer 4: Dropout
         # ------------------------------------------------------------------
         self.dropout = nn.Dropout(p=dropout)
 
         # ------------------------------------------------------------------
-        # Layer 4: Fully-connected output layer
-        # Projects the ``hidden_size``-dimensional hidden state down to a
-        # single scalar logit.  The sigmoid activation (applied in forward)
-        # converts this logit to a probability in (0, 1).
+        # Layer 5: Fully-connected output layer
         # ------------------------------------------------------------------
         self.fc = nn.Linear(in_features=hidden_size, out_features=1)
 
@@ -193,12 +186,12 @@ class SentimentLSTM(nn.Module):
         # Shape: (batch_size, hidden_size)
         last_hidden = h_n[-1]
 
-        # Step 4 — Apply dropout for regularisation
-        # Shape: (batch_size, hidden_size)  (unchanged, but some units zeroed)
+        # Step 4 — Batch normalisation (if enabled)
+        if self.batch_norm is not None:
+            last_hidden = self.batch_norm(last_hidden)
+
+        # Step 5 — Dropout
         out = self.dropout(last_hidden)
 
-        # Step 5 — Linear projection (raw logit)
-        # Returns (batch_size, 1) unbounded logit.
-        # Apply torch.sigmoid() externally when you need a probability,
-        # or use BCEWithLogitsLoss during training for numerical stability.
+        # Step 6 — Linear projection → raw logit (batch_size, 1)
         return self.fc(out)
