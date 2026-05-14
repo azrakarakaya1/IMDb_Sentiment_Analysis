@@ -46,12 +46,13 @@ def test_model_output_shape(model):
     assert output.shape == (4, 1)
 
 
-def test_model_output_range(model):
-    """All outputs are in [0.0, 1.0] — sigmoid is applied in forward()."""
+def test_model_output_is_logit(model):
+    """Output is a raw logit; sigmoid(output) must be in [0.0, 1.0]."""
     x = torch.randint(0, 1000, (4, 500))
     output = model(x)
-    assert output.min().item() >= 0.0
-    assert output.max().item() <= 1.0
+    probs = torch.sigmoid(output)
+    assert probs.min().item() >= 0.0
+    assert probs.max().item() <= 1.0
 
 
 def test_model_embedding_dim(model):

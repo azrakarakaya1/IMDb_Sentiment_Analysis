@@ -169,9 +169,10 @@ class SentimentLSTM(nn.Module):
         Returns
         -------
         torch.Tensor
-            Float tensor of shape ``(batch_size, 1)`` with values in
-            ``[0, 1]``.  Each value is the predicted probability that the
-            corresponding review has *positive* sentiment.
+            Float tensor of shape ``(batch_size, 1)`` containing raw logits
+            (unbounded real values).  Apply ``torch.sigmoid()`` to obtain
+            probabilities in ``(0, 1)``; use ``BCEWithLogitsLoss`` during
+            training for numerical stability.
         """
 
         # Step 1 — Embed token indices
@@ -196,7 +197,8 @@ class SentimentLSTM(nn.Module):
         # Shape: (batch_size, hidden_size)  (unchanged, but some units zeroed)
         out = self.dropout(last_hidden)
 
-        # Step 5 — Linear projection + sigmoid activation
-        # self.fc(out) → (batch_size, 1)  raw logit
-        # torch.sigmoid → (batch_size, 1) probability in (0, 1)
-        return torch.sigmoid(self.fc(out))
+        # Step 5 — Linear projection (raw logit)
+        # Returns (batch_size, 1) unbounded logit.
+        # Apply torch.sigmoid() externally when you need a probability,
+        # or use BCEWithLogitsLoss during training for numerical stability.
+        return self.fc(out)
