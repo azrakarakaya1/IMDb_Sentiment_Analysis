@@ -39,11 +39,11 @@ Run the notebooks in order. Each notebook saves artifacts consumed by the next.
 
 | # | Notebook | Description |
 |---|----------|-------------|
-| 01 | `01_data_exploration.ipynb` | Load the CSV, verify shape and class balance, compute length statistics, render sample reviews, plot histograms and word clouds |
-| 02 | `02_preprocessing.ipynb` | Split data 80/10/10, clean text, build vocabulary from training split, encode all splits to fixed-length integer sequences, save `vocab.pkl` and `.npy` files |
-| 03 | `03_model_building.ipynb` | Define `SentimentLSTM`, print model summary, run a smoke-test forward pass with dummy input |
-| 04 | `04_training.ipynb` | Train with early stopping, plot loss/accuracy curves, run a 2-layer experiment, compare baseline vs. experiment |
-| 05 | `05_evaluation.ipynb` | Load best checkpoint, evaluate on test set, display confusion matrix and classification report, predict on custom reviews |
+| 01 | `notebooks/01_data_exploration.ipynb` | Load the CSV, verify shape and class balance, compute length statistics, render sample reviews, plot histograms and word clouds |
+| 02 | `notebooks/02_preprocessing.ipynb` | Split data 80/10/10, clean text, build vocabulary from training split, encode all splits to fixed-length integer sequences, save `vocab.pkl` and `.npy` files |
+| 03 | `notebooks/03_model_building.ipynb` | Define `SentimentLSTM`, print model summary, run a smoke-test forward pass with dummy input |
+| 04 | `notebooks/04_training.ipynb` | Train with early stopping, plot loss/accuracy curves, run a 2-layer experiment, compare baseline vs. experiment |
+| 05 | `notebooks/05_evaluation.ipynb` | Load best checkpoint, evaluate on test set, display confusion matrix and classification report, predict on custom reviews |
 
 ---
 
@@ -55,7 +55,7 @@ Run the notebooks in order. Each notebook saves artifacts consumed by the next.
    ```python
    !pip install -r requirements.txt
    ```
-4. Run notebooks `01` through `05` in order, top-to-bottom. Each notebook adds the repo root to `sys.path` so `src/` is importable.
+4. Run notebooks `01` through `05` in order, top-to-bottom. Each notebook changes its working directory to the repo root automatically, so all relative paths (`data/`, `checkpoints/`) and `src/` imports work correctly.
 
 > **Note**: Notebooks are designed to run without modification in a fresh Colab environment. GPU runtime is recommended for notebook 04 (training).
 
@@ -96,13 +96,14 @@ imdb-sentiment-lstm/
 │   ├── __init__.py
 │   ├── test_preprocessing.py     # unit + property-based tests for preprocessing
 │   └── test_model.py             # unit tests for SentimentLSTM
+├── notebooks/
+│   ├── 01_data_exploration.ipynb
+│   ├── 02_preprocessing.ipynb
+│   ├── 03_model_building.ipynb
+│   ├── 04_training.ipynb
+│   └── 05_evaluation.ipynb
 ├── report/
 │   └── final_report.md           # written report (2,000–5,000 words)
-├── 01_data_exploration.ipynb
-├── 02_preprocessing.ipynb
-├── 03_model_building.ipynb
-├── 04_training.ipynb
-├── 05_evaluation.ipynb
 ├── requirements.txt
 └── README.md
 ```
