@@ -18,6 +18,9 @@ __pycache__/
 *.py[cod]
 *.pyo
 
+# ── Jupyter checkpoint'leri ──────────────────────────────────────────────
+.ipynb_checkpoints/
+
 # ── Test/araç cache'leri ─────────────────────────────────────────────────
 .pytest_cache/
 .hypothesis/
