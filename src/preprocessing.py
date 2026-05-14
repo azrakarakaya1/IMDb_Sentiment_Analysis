@@ -331,11 +331,10 @@ class Tokenizer:
             ▼
         fixed-length sequence (List[int], length == max_len)
 
-    Padding strategy: **post-padding** — padding tokens are appended at the
-    *end* of the sequence.  This is the conventional choice when using
-    ``batch_first=True`` in ``nn.LSTM`` because the LSTM reads left-to-right
-    and the final hidden state (used for classification) is taken from the last
-    *real* token rather than from a padding token.
+    Padding strategy: **pre-padding** — padding tokens are prepended at the
+    *beginning* of the sequence.  This ensures that ``h_n[-1]`` (the final
+    LSTM hidden state used for classification) is computed after the last
+    *real* token, not after a run of meaningless zero-embedding padding steps.
 
     Parameters
     ----------
@@ -415,9 +414,11 @@ class Tokenizer:
         # Truncate: keep only the first max_len indices
         indices = indices[:self.max_len]
 
-        # Post-pad: append PAD_IDX (0) until the sequence reaches max_len
+        # Pre-pad: prepend PAD_IDX (0) so real content ends at position max_len-1.
+        # h_n[-1] then reflects the hidden state after the last real token, not
+        # after a run of zero-embedding padding steps.
         padding_needed = self.max_len - len(indices)
-        indices = indices + [Vocabulary.PAD_IDX] * padding_needed
+        indices = [Vocabulary.PAD_IDX] * padding_needed + indices
 
         return indices
 

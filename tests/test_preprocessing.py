@@ -97,13 +97,14 @@ def test_tokenizer_encode_length_long():
     assert len(encoded) == 500
 
 
-def test_tokenizer_post_padding():
+def test_tokenizer_pre_padding():
     tokenizer = _make_tokenizer()
     short_text = "hello world"
     encoded = tokenizer.encode(short_text)
-    # The last positions should be PAD_IDX (0)
-    assert encoded[-1] == Vocabulary.PAD_IDX
-    assert encoded[10] == Vocabulary.PAD_IDX
+    # "hello world" → 2 real tokens, 498 PAD tokens at the beginning
+    assert encoded[0] == Vocabulary.PAD_IDX    # first position is PAD
+    assert encoded[10] == Vocabulary.PAD_IDX   # many early positions are PAD
+    assert encoded[-1] != Vocabulary.PAD_IDX   # last position is real content
 
 
 def test_tokenizer_truncation():
