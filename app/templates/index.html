@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IMDb Sentiment Analyzer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      color: #111827;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 60%, #3b82f6 100%);
+      padding: 40px 24px 36px;
+      text-align: center;
+      color: white;
+    }
+    .header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+    }
+    .header p {
+      font-size: 14px;
+      opacity: 0.8;
+      margin-top: 7px;
+    }
+
+    /* ── Layout ── */
+    .container {
+      max-width: 780px;
+      margin: 32px auto 64px;
+      padding: 0 20px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 28px 32px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 24px rgba(0,0,0,0.06);
+      margin-bottom: 20px;
+    }
+
+    /* ── Input section ── */
+    .section-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 108px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 13px 15px;
+      font-family: inherit;
+      font-size: 15px;
+      line-height: 1.6;
+      color: #374151;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.18s, box-shadow 0.18s;
+    }
+    textarea:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+    }
+    textarea::placeholder { color: #d1d5db; }
+
+    /* ── Chips ── */
+    .chips-label {
+      font-size: 12px;
+      color: #9ca3af;
+      font-weight: 500;
+      margin: 14px 0 8px;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 22px;
+    }
+    .chip {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-family: inherit;
+      font-size: 12.5px;
+      color: #6b7280;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .chip:hover {
+      background: #eff6ff;
+      color: #2563eb;
+      border-color: #bfdbfe;
+    }
+
+    /* ── Analyze button ── */
+    .btn-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .hint {
+      font-size: 12px;
+      color: #d1d5db;
+    }
+    .btn-analyze {
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 9px;
+      padding: 11px 30px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.18s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-analyze:hover    { background: #1d4ed8; }
+    .btn-analyze:active   { transform: scale(0.97); }
+    .btn-analyze:disabled { background: #93c5fd; cursor: not-allowed; }
+
+    .error-msg {
+      font-size: 13px;
+      color: #dc2626;
+      margin-top: 10px;
+      min-height: 18px;
+    }
+
+    /* ── Spinner ── */
+    .spinner {
+      width: 15px;
+      height: 15px;
+      border: 2px solid rgba(255,255,255,0.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.55s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Result card ── */
+    .result-card {
+      display: none;
+    }
+    .result-card.visible {
+      display: block;
+      animation: fadeUp 0.28s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Sentiment row ── */
+    .sentiment-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      border-radius: 10px;
+      padding: 10px 22px;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+    .badge.positive { background: #dcfce7; color: #16a34a; }
+    .badge.negative { background: #fee2e2; color: #dc2626; }
+
+    .conf-block { flex: 1; min-width: 160px; }
+    .conf-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 6px;
+    }
+    .conf-labels .conf-pct { font-weight: 600; color: #374151; }
+    .conf-track {
+      background: #f3f4f6;
+      border-radius: 6px;
+      height: 9px;
+      overflow: hidden;
+    }
+    .conf-fill {
+      height: 100%;
+      border-radius: 6px;
+      width: 0%;
+      transition: width 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .conf-fill.positive { background: #16a34a; }
+    .conf-fill.negative { background: #dc2626; }
+
+    .logit-badge {
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 13px;
+      color: #6b7280;
+      background: #f3f4f6;
+      padding: 7px 13px;
+      border-radius: 7px;
+      white-space: nowrap;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      height: 1px;
+      background: #f3f4f6;
+      margin: 20px 0;
+    }
+
+    /* ── Token visualization ── */
+    .tokens-area {
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 18px 20px;
+      line-height: 2.8;
+      margin-bottom: 16px;
+    }
+
+    .token {
+      display: inline-block;
+      border-radius: 5px;
+      padding: 3px 9px;
+      margin: 2px 3px;
+      font-size: 15px;
+      cursor: default;
+      transition: transform 0.12s, box-shadow 0.12s;
+    }
+    .token:hover {
+      transform: translateY(-2px) scale(1.06);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+      z-index: 1;
+      position: relative;
+    }
+    .token.oov {
+      text-decoration: underline dotted 1.5px currentColor;
+      text-underline-offset: 3px;
+    }
+
+    /* ── Legend ── */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    .legend-swatch {
+      display: inline-block;
+      width: 26px;
+      height: 14px;
+      border-radius: 3px;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+    .legend-oov {
+      text-decoration: underline dotted 1.5px #9ca3af;
+      text-underline-offset: 3px;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #d1d5db;
+      margin-top: 36px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>IMDb Sentiment Analyzer</h1>
+  <p>3-Layer LSTM + Batch Normalisation &nbsp;·&nbsp; Trained on 40,000 IMDb reviews</p>
+</div>
+
+<div class="container">
+
+  <!-- Input card -->
+  <div class="card">
+    <span class="section-label">Movie Review</span>
+    <textarea id="review-input" placeholder="Type or paste a movie review here…"></textarea>
+
+    <p class="chips-label">Try an example</p>
+    <div class="chips" id="chips-container"></div>
+
+    <div class="btn-row">
+      <span class="hint">Tip: ⌘ Enter / Ctrl Enter to analyze</span>
+      <button class="btn-analyze" id="analyze-btn" onclick="analyze()">
+        Analyze
+      </button>
+    </div>
+    <p class="error-msg" id="error-msg"></p>
+  </div>
+
+  <!-- Result card (hidden until first analysis) -->
+  <div class="card result-card" id="result-card">
+
+    <div class="sentiment-row">
+      <div class="badge" id="result-badge"></div>
+
+      <div class="conf-block">
+        <div class="conf-labels">
+          <span>Confidence</span>
+          <span class="conf-pct" id="conf-pct"></span>
+        </div>
+        <div class="conf-track">
+          <div class="conf-fill" id="conf-fill"></div>
+        </div>
+      </div>
+
+      <div class="logit-badge" id="logit-badge"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <span class="section-label">Token Influence</span>
+    <div class="tokens-area" id="tokens-area"></div>
+
+    <div class="legend">
+      <span>
+        <span class="legend-swatch" style="background:rgba(22,163,74,0.72);"></span>
+        pushes positive
+      </span>
+      <span>
+        <span class="legend-swatch" style="background:rgba(220,38,38,0.72);"></span>
+        pushes negative
+      </span>
+      <span style="color:#e5e7eb;">|</span>
+      <span>darker = stronger influence</span>
+      <span style="color:#e5e7eb;">|</span>
+      <span class="legend-oov">word</span>
+      <span>= out-of-vocabulary</span>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    Vocabulary 20,002 tokens &nbsp;·&nbsp; Sequence length 500 &nbsp;·&nbsp;
+    Input × gradient saliency
+  </div>
+
+</div>
+
+<script>
+  /* ── Example reviews ───────────────────────────────────────────────────── */
+  const EXAMPLES = [
+    {
+      label: '⭐ Masterpiece',
+      text : 'An absolute masterpiece. The director weaves together stunning visuals and a deeply moving story that left me speechless. Every performance was flawless and the cinematography was breathtaking.'
+    },
+    {
+      label: '💀 Walk-out',
+      text : 'I walked out after thirty minutes. The plot made no sense, the acting was wooden, and the dialogue was painfully clichéd. A complete waste of time and money.'
+    },
+    {
+      label: '🎭 Mixed',
+      text : 'Not bad at all, but honestly not as good as the critics claimed. Some scenes were genuinely moving but the ending felt rushed and unsatisfying.'
+    },
+    {
+      label: '😂 Great cast',
+      text : 'Funny, heartfelt, and surprisingly touching. The ensemble cast has incredible chemistry and the script is sharp throughout. I laughed, I teared up, and I left feeling genuinely happy.'
+    },
+    {
+      label: '😴 Skip it',
+      text : 'Disappointing. The trailers promised action but the actual film was slow and devoid of any tension. The special effects looked cheap and the story went nowhere.'
+    },
+  ];
+
+  const chipsEl = document.getElementById('chips-container');
+  EXAMPLES.forEach(ex => {
+    const btn   = document.createElement('button');
+    btn.className   = 'chip';
+    btn.textContent = ex.label;
+    btn.onclick     = () => { document.getElementById('review-input').value = ex.text; };
+    chipsEl.appendChild(btn);
+  });
+
+  /* ── Analyze ───────────────────────────────────────────────────────────── */
+  async function analyze() {
+    const text   = document.getElementById('review-input').value.trim();
+    const btn    = document.getElementById('analyze-btn');
+    const errEl  = document.getElementById('error-msg');
+    errEl.textContent = '';
+
+    if (!text) { errEl.textContent = 'Please enter a review.'; return; }
+
+    btn.disabled  = true;
+    btn.innerHTML = '<div class="spinner"></div> Analyzing…';
+
+    try {
+      const res  = await fetch('/analyze', {
+        method : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify({ text }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      renderResult(data);
+    } catch (e) {
+      errEl.textContent = 'Error: ' + e.message;
+    } finally {
+      btn.disabled  = false;
+      btn.innerHTML = 'Analyze';
+    }
+  }
+
+  /* ── Render result ─────────────────────────────────────────────────────── */
+  function renderResult(data) {
+    const isPos = data.sentiment === 'POSITIVE';
+    const cls   = isPos ? 'positive' : 'negative';
+    const pct   = (data.confidence * 100).toFixed(1);
+
+    /* Badge */
+    const badge = document.getElementById('result-badge');
+    badge.textContent = data.sentiment;
+    badge.className   = 'badge ' + cls;
+
+    /* Confidence bar */
+    document.getElementById('conf-pct').textContent = pct + '%';
+    const fill = document.getElementById('conf-fill');
+    fill.className    = 'conf-fill ' + cls;
+    fill.style.width  = '0%';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => { fill.style.width = pct + '%'; });
+    });
+
+    /* Logit */
+    const sign = data.logit >= 0 ? '+' : '';
+    document.getElementById('logit-badge').textContent =
+      'logit ' + sign + data.logit.toFixed(3);
+
+    /* Tokens */
+    const area = document.getElementById('tokens-area');
+    area.innerHTML = '';
+
+    data.tokens.forEach((tok, i) => {
+      const score = data.scores[i];
+      const alpha = Math.min(0.12 + 0.68 * Math.abs(score), 0.92);
+      const bg    = score >= 0
+        ? `rgba(22,163,74,${alpha.toFixed(2)})`
+        : `rgba(220,38,38,${alpha.toFixed(2)})`;
+      const fg    = alpha > 0.52
+        ? '#ffffff'
+        : (score >= 0 ? '#166534' : '#7f1d1d');
+
+      const span         = document.createElement('span');
+      span.className     = 'token' + (data.oov[i] ? ' oov' : '');
+      span.style.background = bg;
+      span.style.color      = fg;
+      span.textContent      = tok;
+      span.title            =
+        `score: ${score >= 0 ? '+' : ''}${score.toFixed(3)}` +
+        (data.oov[i] ? ' · out-of-vocabulary' : '');
+      area.appendChild(span);
+    });
+
+    /* Show card with animation */
+    const card = document.getElementById('result-card');
+    card.classList.remove('visible');
+    void card.offsetWidth;           // force reflow to retrigger animation
+    card.classList.add('visible');
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  /* ── Keyboard shortcut ─────────────────────────────────────────────────── */
+  document.getElementById('review-input').addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') analyze();
+  });
+</script>
+</body>
+</html>
