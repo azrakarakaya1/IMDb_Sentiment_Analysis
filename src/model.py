@@ -130,6 +130,15 @@ class SentimentLSTM(nn.Module):
             batch_first=True,
             dropout=lstm_dropout,
         )
+        # Initialise forget-gate biases to 1.0 so the gate starts open.
+        # Without this, a deep LSTM processing 270+ PAD tokens collapses all
+        # hidden states to near-zero before the real tokens begin, which
+        # kills BatchNorm variance and prevents learning.
+        for layer in range(num_layers):
+            for suffix in ('ih', 'hh'):
+                bias = getattr(self.lstm, f'bias_{suffix}_l{layer}')
+                n = bias.size(0)
+                bias.data[n // 4 : n // 2].fill_(1.0)
 
         # ------------------------------------------------------------------
         # Layer 3 (optional): Batch Normalisation
