@@ -5,495 +5,745 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IMDb Sentiment Analyzer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f0f2f5;
+      font-family: 'Inter', sans-serif;
+      background: #f4f6f9;
       min-height: 100vh;
-      color: #111827;
+      color: #1e293b;
     }
 
-    /* ── Header ── */
+    /* Header */
     .header {
-      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 60%, #3b82f6 100%);
+      background: linear-gradient(135deg, #1e0a10, #8b1a2f);
       padding: 40px 24px 36px;
       text-align: center;
-      color: white;
+      color: #fff;
     }
-    .header h1 {
-      font-size: 26px;
-      font-weight: 700;
-      letter-spacing: -0.4px;
-    }
-    .header p {
-      font-size: 14px;
-      opacity: 0.8;
-      margin-top: 7px;
-    }
+    .header h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+    .header p  { font-size: 12px; color: rgba(255,255,255,0.5); font-family: 'JetBrains Mono', monospace; }
 
-    /* ── Layout ── */
-    .container {
-      max-width: 780px;
-      margin: 32px auto 64px;
-      padding: 0 20px;
-    }
+    /* Layout */
+    .container { max-width: 760px; margin: 28px auto 80px; padding: 0 18px; }
 
-    /* ── Card ── */
+    /* Card */
     .card {
-      background: #ffffff;
-      border-radius: 16px;
-      padding: 28px 32px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 24px rgba(0,0,0,0.06);
-      margin-bottom: 20px;
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid #e8edf3;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.05);
+      margin-bottom: 14px;
+      padding: 24px 26px;
     }
 
-    /* ── Input section ── */
-    .section-label {
-      display: block;
-      font-size: 11px;
-      font-weight: 600;
-      color: #9ca3af;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 10px;
-    }
-
+    /* Textarea */
     textarea {
-      width: 100%;
-      min-height: 108px;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 10px;
-      padding: 13px 15px;
-      font-family: inherit;
-      font-size: 15px;
-      line-height: 1.6;
-      color: #374151;
-      resize: vertical;
-      outline: none;
-      transition: border-color 0.18s, box-shadow 0.18s;
+      width: 100%; min-height: 110px;
+      border: 1.5px solid #e2e8f0; border-radius: 10px;
+      padding: 14px 16px; font-family: inherit; font-size: 14.5px;
+      line-height: 1.7; color: #1e293b; background: #fafbff;
+      resize: vertical; outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
     textarea:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+      border-color: #a0203a;
+      box-shadow: 0 0 0 3px rgba(139,26,47,0.1);
     }
-    textarea::placeholder { color: #d1d5db; }
+    textarea::placeholder { color: #c0c9d8; }
 
-    /* ── Chips ── */
-    .chips-label {
-      font-size: 12px;
-      color: #9ca3af;
-      font-weight: 500;
-      margin: 14px 0 8px;
-    }
-    .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 7px;
-      margin-bottom: 22px;
-    }
+    /* Example chips */
+    .chips-label { font-size: 11px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin: 16px 0 8px; }
+    .chips { display: flex; flex-direction: column; gap: 4px; margin-bottom: 20px; }
     .chip {
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 20px;
-      padding: 5px 14px;
-      font-family: inherit;
-      font-size: 12.5px;
-      color: #6b7280;
-      cursor: pointer;
-      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      display: flex; align-items: baseline; gap: 10px;
+      text-align: left; padding: 8px 12px; border-radius: 8px;
+      border: 1px solid #f1f5f9; background: #fafbff;
+      font-family: inherit; cursor: pointer; transition: all 0.12s;
     }
-    .chip:hover {
-      background: #eff6ff;
-      color: #2563eb;
-      border-color: #bfdbfe;
-    }
+    .chip:hover { background: #f5f3f4; border-color: #e8d5d9; }
+    .chip-label { font-size: 12px; font-weight: 600; color: #374151; white-space: nowrap; }
+    .chip-snippet { font-size: 11.5px; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    /* ── Analyze button ── */
-    .btn-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 10px;
+    /* Analyze button */
+    .btn-row { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+    .btn-hint { font-size: 11.5px; color: #cbd5e1; }
+    .btn {
+      background: #8b1a2f; color: #fff; border: none; border-radius: 9px;
+      padding: 10px 24px; font-family: inherit; font-size: 13.5px; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; gap: 8px;
+      transition: background 0.15s, transform 0.1s;
     }
-    .hint {
-      font-size: 12px;
-      color: #d1d5db;
-    }
-    .btn-analyze {
-      background: #2563eb;
-      color: white;
-      border: none;
-      border-radius: 9px;
-      padding: 11px 30px;
-      font-family: inherit;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.18s, transform 0.1s;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .btn-analyze:hover    { background: #1d4ed8; }
-    .btn-analyze:active   { transform: scale(0.97); }
-    .btn-analyze:disabled { background: #93c5fd; cursor: not-allowed; }
+    .btn:hover:not(:disabled) { background: #6e1424; }
+    .btn:active:not(:disabled) { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    .error-msg {
-      font-size: 13px;
-      color: #dc2626;
-      margin-top: 10px;
-      min-height: 18px;
-    }
-
-    /* ── Spinner ── */
     .spinner {
-      width: 15px;
-      height: 15px;
-      border: 2px solid rgba(255,255,255,0.35);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin 0.55s linear infinite;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+      border-radius: 50%; animation: spin 0.5s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Result card ── */
-    .result-card {
-      display: none;
-    }
-    .result-card.visible {
-      display: block;
-      animation: fadeUp 0.28s ease;
-    }
+    .error-msg { font-size: 12.5px; color: #ef4444; margin-top: 10px; min-height: 18px; }
+
+    /* Result */
+    .result-card { display: none; }
+    .result-card.visible { display: block; animation: fadeUp 0.35s ease; }
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(10px); }
+      from { opacity: 0; transform: translateY(12px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ── Sentiment row ── */
-    .sentiment-row {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
+    .verdict-row { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+
+    .sentiment-badge {
+      font-size: 20px; font-weight: 700; letter-spacing: 0.04em;
+      padding: 9px 20px; border-radius: 10px;
+      animation: badgePop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .sentiment-badge.positive { background: #ecfdf5; color: #059669; }
+    .sentiment-badge.negative { background: #fef2f2; color: #dc2626; }
+    @keyframes badgePop {
+      from { transform: scale(0.7); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
     }
 
-    .badge {
-      border-radius: 10px;
-      padding: 10px 22px;
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      white-space: nowrap;
+    .gauge-wrap { position: relative; width: 72px; height: 72px; flex-shrink: 0; }
+    .gauge-svg  { width: 72px; height: 72px; transform: rotate(-90deg); }
+    .gauge-bg   { fill: none; stroke: #f1f5f9; stroke-width: 6; }
+    .gauge-fill {
+      fill: none; stroke-width: 6; stroke-linecap: round;
+      stroke-dasharray: 172; stroke-dashoffset: 172;
+      transition: stroke-dashoffset 0.7s ease, stroke 0.2s;
     }
-    .badge.positive { background: #dcfce7; color: #16a34a; }
-    .badge.negative { background: #fee2e2; color: #dc2626; }
+    .gauge-fill.positive { stroke: #10b981; }
+    .gauge-fill.negative { stroke: #ef4444; }
+    .gauge-center {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .gauge-pct  { font-size: 14px; font-weight: 700; color: #1e293b; line-height: 1; }
+    .gauge-lbl  { font-size: 8.5px; color: #94a3b8; margin-top: 2px; }
 
-    .conf-block { flex: 1; min-width: 160px; }
-    .conf-labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      color: #6b7280;
-      margin-bottom: 6px;
+    .meta-text {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      color: #94a3b8; line-height: 1.8;
     }
-    .conf-labels .conf-pct { font-weight: 600; color: #374151; }
-    .conf-track {
-      background: #f3f4f6;
-      border-radius: 6px;
-      height: 9px;
-      overflow: hidden;
-    }
-    .conf-fill {
-      height: 100%;
-      border-radius: 6px;
-      width: 0%;
-      transition: width 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .conf-fill.positive { background: #16a34a; }
-    .conf-fill.negative { background: #dc2626; }
+    .meta-text strong { color: #64748b; }
 
-    .logit-badge {
-      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-      font-size: 13px;
-      color: #6b7280;
-      background: #f3f4f6;
-      padding: 7px 13px;
-      border-radius: 7px;
-      white-space: nowrap;
+    .divider { height: 1px; background: #f1f5f9; margin: 20px 0; }
+
+    .sec-label {
+      display: block; font-size: 10px; font-weight: 700; color: #94a3b8;
+      text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 11px;
     }
 
-    /* ── Divider ── */
-    .divider {
-      height: 1px;
-      background: #f3f4f6;
-      margin: 20px 0;
-    }
-
-    /* ── Token visualization ── */
+    /* Tokens */
     .tokens-area {
-      background: #f9fafb;
-      border-radius: 10px;
-      padding: 18px 20px;
-      line-height: 2.8;
-      margin-bottom: 16px;
+      background: #fafbff; border: 1px solid #f1f5f9;
+      border-radius: 10px; padding: 16px 18px;
+      line-height: 3; margin-bottom: 10px;
     }
-
     .token {
-      display: inline-block;
-      border-radius: 5px;
-      padding: 3px 9px;
-      margin: 2px 3px;
-      font-size: 15px;
-      cursor: default;
-      transition: transform 0.12s, box-shadow 0.12s;
+      display: inline-block; border-radius: 5px;
+      padding: 2px 8px; margin: 2px 2px;
+      font-size: 14px; cursor: default; position: relative;
+      opacity: 0; transition: transform 0.1s, box-shadow 0.1s, opacity 0.2s;
     }
-    .token:hover {
-      transform: translateY(-2px) scale(1.06);
-      box-shadow: 0 3px 10px rgba(0,0,0,0.12);
-      z-index: 1;
-      position: relative;
+    .token.appear { animation: tokenPop 0.28s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+    @keyframes tokenPop {
+      from { opacity: 0; transform: scale(0.7); }
+      to   { opacity: 1; transform: scale(1); }
     }
-    .token.oov {
-      text-decoration: underline dotted 1.5px currentColor;
-      text-underline-offset: 3px;
+    .token:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.14); z-index: 2; }
+    .token:hover::after {
+      content: attr(data-tip);
+      position: absolute; bottom: calc(100% + 6px); left: 50%;
+      transform: translateX(-50%);
+      background: #1e293b; color: #fff;
+      font-size: 10.5px; font-family: 'JetBrains Mono', monospace;
+      padding: 3px 8px; border-radius: 5px; white-space: nowrap;
+      pointer-events: none;
     }
+    .token.oov { text-decoration: underline dotted 1.5px currentColor; text-underline-offset: 3px; }
+    .token.dim { opacity: 0.2 !important; }
 
-    /* ── Legend ── */
-    .legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 14px;
-      align-items: center;
-      font-size: 12px;
-      color: #9ca3af;
-    }
-    .legend-swatch {
-      display: inline-block;
-      width: 26px;
-      height: 14px;
-      border-radius: 3px;
-      margin-right: 5px;
-      vertical-align: middle;
-    }
-    .legend-oov {
-      text-decoration: underline dotted 1.5px #9ca3af;
-      text-underline-offset: 3px;
-    }
+    .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 11.5px; color: #94a3b8; align-items: center; }
+    .swatch { display: inline-block; width: 18px; height: 9px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+    .oov-ex { text-decoration: underline dotted 1.5px #94a3b8; text-underline-offset: 3px; }
 
-    /* ── Footer ── */
-    .footer {
-      text-align: center;
-      font-size: 12px;
-      color: #d1d5db;
-      margin-top: 36px;
+    /* Arc diagram */
+    .arc-card { display: none; }
+    .arc-card.visible { display: block; animation: fadeUp 0.35s ease 0.05s both; }
+    .arc-card-head { margin-bottom: 4px; }
+    .arc-card-title { font-size: 13px; font-weight: 600; color: #1e293b; }
+    .arc-card-desc  { font-size: 11.5px; color: #94a3b8; margin-bottom: 16px; line-height: 1.5; }
+    .arc-svg-box { background: #fafbff; border: 1px solid #f1f5f9; border-radius: 10px; }
+    .arc-svg { width: 100%; height: auto; display: block; }
+    .arc-legend {
+      display: flex; flex-wrap: wrap; gap: 16px;
+      margin-top: 12px; font-size: 11.5px; color: #94a3b8; align-items: center;
     }
+    .arc-swatch { display: inline-block; width: 20px; height: 2px; border-radius: 2px; vertical-align: middle; margin-right: 5px; }
+
+    /* ── Timeline ── */
+    .timeline-card { display: none; }
+    .timeline-card.visible { display: block; animation: fadeUp 0.35s ease 0.05s both; }
+    .timeline-title { font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 4px; }
+    .timeline-desc  { font-size: 11.5px; color: #94a3b8; margin-bottom: 14px; }
+    .timeline-svg-box { background: #fafbff; border: 1px solid #f1f5f9; border-radius: 10px; }
+    .timeline-svg { width: 100%; height: auto; display: block; cursor: crosshair; }
+    .timeline-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; font-size: 11.5px; color: #94a3b8; align-items: center; }
+    .tp-info { display: none; font-size: 11.5px; color: #92400e; background: #fffbeb; border: 1px solid #fde68a; border-radius: 7px; padding: 8px 12px; margin-top: 10px; }
+    .token.turning { outline: 2px solid #f59e0b !important; outline-offset: 2px; }
+
+    .footer { text-align: center; font-size: 11px; color: #cbd5e1; margin-top: 24px; font-family: 'JetBrains Mono', monospace; }
   </style>
 </head>
 <body>
 
 <div class="header">
   <h1>IMDb Sentiment Analyzer</h1>
-  <p>3-Layer LSTM + Batch Normalisation &nbsp;·&nbsp; Trained on 40,000 IMDb reviews</p>
 </div>
 
 <div class="container">
 
-  <!-- Input card -->
   <div class="card">
-    <span class="section-label">Movie Review</span>
-    <textarea id="review-input" placeholder="Type or paste a movie review here…"></textarea>
-
-    <p class="chips-label">Try an example</p>
-    <div class="chips" id="chips-container"></div>
-
+    <textarea id="review-input" placeholder="Paste a movie review…"></textarea>
+    <p class="chips-label">Examples</p>
+    <div class="chips" id="chips"></div>
     <div class="btn-row">
-      <span class="hint">Tip: ⌘ Enter / Ctrl Enter to analyze</span>
-      <button class="btn-analyze" id="analyze-btn" onclick="analyze()">
-        Analyze
+      <span class="btn-hint">⌘ Enter</span>
+      <button class="btn" id="analyze-btn" onclick="analyze()">
+        <span id="btn-label">Analyze</span>
       </button>
     </div>
     <p class="error-msg" id="error-msg"></p>
   </div>
 
-  <!-- Result card (hidden until first analysis) -->
   <div class="card result-card" id="result-card">
-
-    <div class="sentiment-row">
-      <div class="badge" id="result-badge"></div>
-
-      <div class="conf-block">
-        <div class="conf-labels">
-          <span>Confidence</span>
-          <span class="conf-pct" id="conf-pct"></span>
-        </div>
-        <div class="conf-track">
-          <div class="conf-fill" id="conf-fill"></div>
+    <div class="verdict-row">
+      <div class="sentiment-badge" id="result-badge"></div>
+      <div class="gauge-wrap">
+        <svg class="gauge-svg" viewBox="0 0 72 72">
+          <circle class="gauge-bg" cx="36" cy="36" r="27.4"/>
+          <circle class="gauge-fill" id="gauge-fill" cx="36" cy="36" r="27.4"/>
+        </svg>
+        <div class="gauge-center">
+          <span class="gauge-pct" id="gauge-pct">—</span>
+          <span class="gauge-lbl">conf.</span>
         </div>
       </div>
-
-      <div class="logit-badge" id="logit-badge"></div>
+      <div class="meta-text" id="meta-text"></div>
     </div>
 
     <div class="divider"></div>
 
-    <span class="section-label">Token Influence</span>
+    <span class="sec-label">Token Influence</span>
     <div class="tokens-area" id="tokens-area"></div>
-
     <div class="legend">
-      <span>
-        <span class="legend-swatch" style="background:rgba(22,163,74,0.72);"></span>
-        pushes positive
-      </span>
-      <span>
-        <span class="legend-swatch" style="background:rgba(220,38,38,0.72);"></span>
-        pushes negative
-      </span>
-      <span style="color:#e5e7eb;">|</span>
-      <span>darker = stronger influence</span>
-      <span style="color:#e5e7eb;">|</span>
-      <span class="legend-oov">word</span>
-      <span>= out-of-vocabulary</span>
+      <span><span class="swatch" style="background:rgba(16,185,129,0.7)"></span>pushes positive</span>
+      <span><span class="swatch" style="background:rgba(239,68,68,0.7)"></span>pushes negative</span>
+      <span style="color:#e2e8f0">·</span>
+      <span>darker = stronger</span>
+      <span style="color:#e2e8f0">·</span>
+      <span class="oov-ex">word</span><span style="margin-left:3px">= out-of-vocab</span>
     </div>
-
   </div>
 
-  <div class="footer">
-    Vocabulary 20,002 tokens &nbsp;·&nbsp; Sequence length 500 &nbsp;·&nbsp;
-    Input × gradient saliency
+  <div class="card arc-card" id="arc-card">
+    <div class="arc-card-head">
+      <span class="arc-card-title">Token Relationships</span>
+    </div>
+    <p class="arc-card-desc" id="arc-card-desc">Most influential tokens — green arcs reinforce, red arcs contrast · hover a token to highlight its connections</p>
+    <div class="arc-svg-box">
+      <svg id="arc-svg" class="arc-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="arc-legend">
+      <span><span class="arc-swatch" style="background:#10b981"></span>both positive</span>
+      <span><span class="arc-swatch" style="background:#ef4444"></span>both negative</span>
+      <span><span class="arc-swatch" style="background:#94a3b8"></span>mixed</span>
+      <span>· node size = influence</span>
+    </div>
   </div>
 
+  <!-- Reading Timeline -->
+  <div class="card timeline-card" id="timeline-card">
+    <div class="timeline-title">Reading Timeline</div>
+    <p class="timeline-desc">Model confidence as it reads each token left to right — hover to inspect</p>
+    <div class="timeline-svg-box">
+      <svg id="timeline-svg" class="timeline-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div id="tp-info" class="tp-info"></div>
+    <div class="timeline-legend">
+      <span><span class="swatch" style="background:rgba(16,185,129,0.45)"></span>positive region</span>
+      <span><span class="swatch" style="background:rgba(239,68,68,0.35)"></span>negative region</span>
+      <span>— — 50% boundary</span>
+    </div>
+  </div>
+
+  <div class="footer">vocab 20,002 · sequence 500 · pre-padding</div>
 </div>
 
 <script>
-  /* ── Example reviews ───────────────────────────────────────────────────── */
-  const EXAMPLES = [
-    {
-      label: '⭐ Masterpiece',
-      text : 'An absolute masterpiece. The director weaves together stunning visuals and a deeply moving story that left me speechless. Every performance was flawless and the cinematography was breathtaking.'
-    },
-    {
-      label: '💀 Walk-out',
-      text : 'I walked out after thirty minutes. The plot made no sense, the acting was wooden, and the dialogue was painfully clichéd. A complete waste of time and money.'
-    },
-    {
-      label: '🎭 Mixed',
-      text : 'Not bad at all, but honestly not as good as the critics claimed. Some scenes were genuinely moving but the ending felt rushed and unsatisfying.'
-    },
-    {
-      label: '😂 Great cast',
-      text : 'Funny, heartfelt, and surprisingly touching. The ensemble cast has incredible chemistry and the script is sharp throughout. I laughed, I teared up, and I left feeling genuinely happy.'
-    },
-    {
-      label: '😴 Skip it',
-      text : 'Disappointing. The trailers promised action but the actual film was slow and devoid of any tension. The special effects looked cheap and the story went nowhere.'
-    },
-  ];
+/* ── Examples ── */
+const EXAMPLES = [
+  { label: 'Masterpiece',  text: 'An absolute masterpiece. The director weaves together stunning visuals and a deeply moving story that left me speechless. Every performance was flawless and the cinematography was breathtaking.' },
+  { label: 'Walk-out',     text: 'I walked out after thirty minutes. The plot made no sense, the acting was wooden, and the dialogue was painfully clichéd. A complete waste of time and money.' },
+  { label: 'Mixed review', text: 'Not bad at all, but honestly not as good as the critics claimed. Some scenes were genuinely moving but the ending felt rushed and unsatisfying.' },
+  { label: 'Great cast',   text: 'Funny, heartfelt, and surprisingly touching. The ensemble cast has incredible chemistry and the script is sharp throughout. I laughed, I teared up, and I left feeling genuinely happy.' },
+  { label: 'Skip it',      text: 'Disappointing. The trailers promised action but the actual film was slow and devoid of any tension. The special effects looked cheap and the story went nowhere.' },
+];
+const chipsEl = document.getElementById('chips');
+chipsEl.innerHTML = EXAMPLES.map((ex, i) =>
+  `<button class="chip" data-idx="${i}">
+     <span class="chip-label">${ex.label}</span>
+     <span class="chip-snippet">${ex.text.slice(0, 60)}…</span>
+   </button>`
+).join('');
+chipsEl.querySelectorAll('.chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('review-input').value = EXAMPLES[+btn.dataset.idx].text;
+  });
+});
 
-  const chipsEl = document.getElementById('chips-container');
-  EXAMPLES.forEach(ex => {
-    const btn   = document.createElement('button');
-    btn.className   = 'chip';
-    btn.textContent = ex.label;
-    btn.onclick     = () => { document.getElementById('review-input').value = ex.text; };
-    chipsEl.appendChild(btn);
+/* ── Analyze ── */
+async function analyze() {
+  const text  = document.getElementById('review-input').value.trim();
+  const btn   = document.getElementById('analyze-btn');
+  const errEl = document.getElementById('error-msg');
+  errEl.textContent = '';
+  if (!text) { errEl.textContent = 'Please enter a review.'; return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div>';
+
+  try {
+    const res  = await fetch('/analyze', {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({ text }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    renderResult(data);
+  } catch (e) {
+    errEl.textContent = 'Error: ' + e.message;
+  } finally {
+    btn.disabled  = false;
+    btn.innerHTML = '<span id="btn-label">Analyze</span>';
+  }
+}
+
+/* ── Render result ── */
+function renderResult(data) {
+  const isPos = data.sentiment === 'POSITIVE';
+  const cls   = isPos ? 'positive' : 'negative';
+
+  const badge = document.getElementById('result-badge');
+  badge.textContent = data.sentiment;
+  badge.className   = 'sentiment-badge ' + cls;
+
+  const fill = document.getElementById('gauge-fill');
+  fill.className = 'gauge-fill ' + cls;
+  fill.style.strokeDashoffset = '172';
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    fill.style.strokeDashoffset = (172 * (1 - data.confidence)).toFixed(2);
+  }));
+  document.getElementById('gauge-pct').textContent = (data.confidence * 100).toFixed(1) + '%';
+
+  const sign = data.logit >= 0 ? '+' : '';
+  document.getElementById('meta-text').innerHTML =
+    `<strong>p =</strong> ${data.probability.toFixed(4)}<br>`+
+    `<strong>logit =</strong> ${sign}${data.logit.toFixed(3)}`;
+
+  const area = document.getElementById('tokens-area');
+  area.innerHTML = '';
+  data.tokens.forEach((tok, i) => {
+    const score = data.scores[i];
+    const alpha = Math.min(0.1 + 0.7 * Math.abs(score), 0.92);
+    const bg    = score >= 0 ? `rgba(16,185,129,${alpha.toFixed(2)})` : `rgba(239,68,68,${alpha.toFixed(2)})`;
+    const fg    = alpha > 0.5 ? '#fff' : (score >= 0 ? '#065f46' : '#7f1d1d');
+    const span  = document.createElement('span');
+    span.className        = 'token' + (data.oov[i] ? ' oov' : '');
+    span.style.background = bg;
+    span.style.color      = fg;
+    span.textContent      = tok;
+    span.dataset.tip      = (score >= 0 ? '+' : '') + score.toFixed(3) + (data.oov[i] ? ' · OOV' : '');
+    span.dataset.tidx     = i;
+    area.appendChild(span);
+    setTimeout(() => span.classList.add('appear'), i * 14);
   });
 
-  /* ── Analyze ───────────────────────────────────────────────────────────── */
-  async function analyze() {
-    const text   = document.getElementById('review-input').value.trim();
-    const btn    = document.getElementById('analyze-btn');
-    const errEl  = document.getElementById('error-msg');
-    errEl.textContent = '';
+  const card = document.getElementById('result-card');
+  card.classList.remove('visible');
+  void card.offsetWidth;
+  card.classList.add('visible');
+  setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+  setTimeout(() => renderArcDiagram(data), 160);
+  fetchAndRenderTimeline(document.getElementById('review-input').value.trim());
+}
 
-    if (!text) { errEl.textContent = 'Please enter a review.'; return; }
+/* ── Arc diagram ── */
+let particleRaf  = null;
+const arcsByToken = new Map();
+const allPaths    = [];
+const allDots     = [];
 
-    btn.disabled  = true;
-    btn.innerHTML = '<div class="spinner"></div> Analyzing…';
+function renderArcDiagram(data) {
+  if (particleRaf) { cancelAnimationFrame(particleRaf); particleRaf = null; }
+  arcsByToken.clear();
+  allPaths.length = 0;
+  allDots.length  = 0;
 
-    try {
-      const res  = await fetch('/analyze', {
-        method : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body   : JSON.stringify({ text }),
-      });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      renderResult(data);
-    } catch (e) {
-      errEl.textContent = 'Error: ' + e.message;
-    } finally {
-      btn.disabled  = false;
-      btn.innerHTML = 'Analyze';
+  const card = document.getElementById('arc-card');
+  const svg  = document.getElementById('arc-svg');
+
+  const indexed = data.tokens.map((tok, i) => ({ tok, score: data.scores[i], idx: i }));
+  const totalN = indexed.length;
+  const K   = Math.min(totalN, Math.min(12, Math.max(5, Math.ceil(Math.sqrt(totalN) * 2))));
+  const top = [...indexed]
+    .sort((a, b) => Math.abs(b.score) - Math.abs(a.score))
+    .slice(0, K)
+    .sort((a, b) => a.idx - b.idx);
+  const N = top.length;
+  if (N < 2) return;
+  document.getElementById('arc-card-desc').textContent =
+    `Top-${N} influential tokens (${totalN} total) — green arcs reinforce, red arcs contrast · hover a token to highlight its connections`;
+
+  const PAD = 32, W = 720, BASE_Y = 136, H = 178;
+  const step = (W - PAD * 2) / (N - 1);
+  top.forEach((t, k) => { t.x = PAD + k * step; });
+
+  svg.innerHTML = '';
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+  svg.insertAdjacentHTML('afterbegin', `
+    <defs>
+      <filter id="glow" x="-80%" y="-80%" width="260%" height="260%">
+        <feGaussianBlur stdDeviation="2.2" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+  `);
+
+  const pairs = [];
+  for (let a = 0; a < N; a++)
+    for (let b = a + 1; b < N; b++) {
+      const str = Math.abs(top[a].score) * Math.abs(top[b].score);
+      if (str < 0.07) continue;
+      pairs.push({ a, b, str, same: Math.sign(top[a].score) === Math.sign(top[b].score) });
     }
-  }
+  pairs.sort((x, y) => x.str - y.str);
+  const shown = pairs.slice(-20);
 
-  /* ── Render result ─────────────────────────────────────────────────────── */
-  function renderResult(data) {
-    const isPos = data.sentiment === 'POSITIVE';
-    const cls   = isPos ? 'positive' : 'negative';
-    const pct   = (data.confidence * 100).toFixed(1);
+  const particleData = [];
 
-    /* Badge */
-    const badge = document.getElementById('result-badge');
-    badge.textContent = data.sentiment;
-    badge.className   = 'badge ' + cls;
+  shown.forEach(({ a, b, str }, i) => {
+    const x1 = top[a].x, x2 = top[b].x;
+    const mx  = (x1 + x2) / 2;
+    const cy  = Math.max(BASE_Y - (x2 - x1) * 0.5, 6);
+    const alpha = Math.min(0.12 + str * 0.7, 0.82);
+    const w     = (0.5 + str * 3.8).toFixed(1);
+    const aPos = top[a].score > 0, bPos = top[b].score > 0;
+    const col = (aPos && bPos)   ? `rgba(16,185,129,${alpha.toFixed(2)})`
+              : (!aPos && !bPos) ? `rgba(239,68,68,${alpha.toFixed(2)})`
+              :                    `rgba(148,163,184,${alpha.toFixed(2)})`;
+    const solidCol = (aPos && bPos) ? '#34d399' : (!aPos && !bPos) ? '#f87171' : '#94a3b8';
 
-    /* Confidence bar */
-    document.getElementById('conf-pct').textContent = pct + '%';
-    const fill = document.getElementById('conf-fill');
-    fill.className    = 'conf-fill ' + cls;
-    fill.style.width  = '0%';
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => { fill.style.width = pct + '%'; });
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', `M ${x1.toFixed(1)} ${BASE_Y} Q ${mx.toFixed(1)} ${cy.toFixed(1)} ${x2.toFixed(1)} ${BASE_Y}`);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', col);
+    path.setAttribute('stroke-width', w);
+    path.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(path);
+    allPaths.push(path);
+
+    [a, b].forEach(ti => {
+      const oi = top[ti].idx;
+      if (!arcsByToken.has(oi)) arcsByToken.set(oi, []);
+      arcsByToken.get(oi).push(path);
     });
 
-    /* Logit */
-    const sign = data.logit >= 0 ? '+' : '';
-    document.getElementById('logit-badge').textContent =
-      'logit ' + sign + data.logit.toFixed(3);
+    const len = path.getTotalLength();
+    path.style.strokeDasharray  = `${len}`;
+    path.style.strokeDashoffset = `${len}`;
+    setTimeout(() => {
+      path.style.transition = 'stroke-dashoffset 0.45s ease';
+      path.style.strokeDashoffset = '0';
+    }, i * 40);
 
-    /* Tokens */
-    const area = document.getElementById('tokens-area');
-    area.innerHTML = '';
-
-    data.tokens.forEach((tok, i) => {
-      const score = data.scores[i];
-      const alpha = Math.min(0.12 + 0.68 * Math.abs(score), 0.92);
-      const bg    = score >= 0
-        ? `rgba(22,163,74,${alpha.toFixed(2)})`
-        : `rgba(220,38,38,${alpha.toFixed(2)})`;
-      const fg    = alpha > 0.52
-        ? '#ffffff'
-        : (score >= 0 ? '#166534' : '#7f1d1d');
-
-      const span         = document.createElement('span');
-      span.className     = 'token' + (data.oov[i] ? ' oov' : '');
-      span.style.background = bg;
-      span.style.color      = fg;
-      span.textContent      = tok;
-      span.title            =
-        `score: ${score >= 0 ? '+' : ''}${score.toFixed(3)}` +
-        (data.oov[i] ? ' · out-of-vocabulary' : '');
-      area.appendChild(span);
-    });
-
-    /* Show card with animation */
-    const card = document.getElementById('result-card');
-    card.classList.remove('visible');
-    void card.offsetWidth;           // force reflow to retrigger animation
-    card.classList.add('visible');
-    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-
-  /* ── Keyboard shortcut ─────────────────────────────────────────────────── */
-  document.getElementById('review-input').addEventListener('keydown', e => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') analyze();
+    // Particle dot
+    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    dot.setAttribute('r', (1.4 + str * 2).toFixed(1));
+    dot.setAttribute('fill', solidCol);
+    dot.setAttribute('filter', 'url(#glow)');
+    dot.style.opacity = '0';
+    svg.appendChild(dot);
+    particleData.push({ dot, x1, cx: mx, cy, x2, t: Math.random(), speed: 0.12 + str * 0.15 });
+    allDots.push(dot);
   });
+
+  // Nodes
+  const nodeDelay = shown.length * 40 + 50;
+  top.forEach((t, k) => {
+    const col = t.score >= 0 ? '#10b981' : '#ef4444';
+    const r   = Math.min(3.5 + Math.abs(t.score) * 6.5, 10.5).toFixed(1);
+    const lbl = t.tok.length > 9 ? t.tok.slice(0, 8) + '…' : t.tok;
+
+    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    c.setAttribute('cx', t.x.toFixed(1)); c.setAttribute('cy', BASE_Y);
+    c.setAttribute('r', r); c.setAttribute('fill', col);
+    c.setAttribute('filter', 'url(#glow)');
+    c.style.opacity = '0';
+    svg.appendChild(c);
+    setTimeout(() => { c.style.transition = 'opacity 0.3s'; c.style.opacity = '0.88'; }, nodeDelay + k * 28);
+
+    const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    txt.setAttribute('x', t.x.toFixed(1)); txt.setAttribute('y', (BASE_Y + 19).toString());
+    txt.setAttribute('text-anchor', 'middle'); txt.setAttribute('font-size', '9.5');
+    txt.setAttribute('font-family', 'JetBrains Mono, monospace'); txt.setAttribute('fill', '#64748b');
+    txt.style.opacity = '0'; txt.textContent = lbl;
+    svg.appendChild(txt);
+    setTimeout(() => { txt.style.transition = 'opacity 0.3s'; txt.style.opacity = '1'; }, nodeDelay + k * 28 + 60);
+  });
+
+  // Start particles
+  const pStart = nodeDelay + top.length * 28 + 180;
+  let lastTs = null;
+  function tick(ts) {
+    if (!lastTs) lastTs = ts;
+    const dt = Math.min((ts - lastTs) / 1000, 0.05);
+    lastTs = ts;
+    particleData.forEach(p => {
+      p.t = (p.t + dt * p.speed) % 1;
+      const mt = 1 - p.t;
+      p.dot.setAttribute('cx', (mt*mt*p.x1 + 2*mt*p.t*p.cx + p.t*p.t*p.x2).toFixed(2));
+      p.dot.setAttribute('cy', (mt*mt*BASE_Y  + 2*mt*p.t*p.cy + p.t*p.t*BASE_Y).toFixed(2));
+    });
+    particleRaf = requestAnimationFrame(tick);
+  }
+  setTimeout(() => {
+    particleData.forEach(p => { p.dot.style.transition = 'opacity 0.5s'; p.dot.style.opacity = '0.85'; });
+    particleRaf = requestAnimationFrame(tick);
+  }, pStart);
+
+  card.classList.remove('visible');
+  void card.offsetWidth;
+  card.classList.add('visible');
+  setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+  setTimeout(wireHover, 40);
+}
+
+/* ── Token hover ↔ arc highlight ── */
+function wireHover() {
+  document.querySelectorAll('.token').forEach(span => {
+    const idx = parseInt(span.dataset.tidx, 10);
+    span.addEventListener('mouseenter', () => {
+      const rel = arcsByToken.get(idx) || [];
+      document.querySelectorAll('.token').forEach(s => s.classList.toggle('dim', s !== span));
+      allPaths.forEach((p, i) => {
+        const show = rel.includes(p);
+        p.style.transition = 'opacity 0.15s';
+        p.style.opacity = show ? '1' : '0.06';
+        if (allDots[i]) {
+          allDots[i].style.transition = 'opacity 0.15s';
+          allDots[i].style.opacity = show ? '0.85' : '0';
+        }
+      });
+    });
+    span.addEventListener('mouseleave', () => {
+      document.querySelectorAll('.token').forEach(s => s.classList.remove('dim'));
+      allPaths.forEach((p, i) => {
+        p.style.transition = 'opacity 0.15s';
+        p.style.opacity = '';
+        if (allDots[i]) {
+          allDots[i].style.transition = 'opacity 0.15s';
+          allDots[i].style.opacity = '';
+        }
+      });
+    });
+  });
+}
+
+/* ── Timeline ── */
+async function fetchAndRenderTimeline(text) {
+  try {
+    const res  = await fetch('/timeline', {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({ text }),
+    });
+    const data = await res.json();
+    if (!data.error) renderTimeline(data.tokens, data.probs);
+  } catch (_) {}
+}
+
+function renderTimeline(tokens, probs) {
+  const N = tokens.length;
+  if (N < 2) return;
+
+  const card = document.getElementById('timeline-card');
+  const svg  = document.getElementById('timeline-svg');
+
+  const PL = 38, PR = 12, PT = 22, PB = 18;
+  const SW = 720, SH = 160;
+  const CW = SW - PL - PR, CH = SH - PT - PB;
+
+  const px = i => PL + (i / (N - 1)) * CW;
+  const py = p => PT + (1 - p) * CH;
+  const thY = py(0.5);
+
+  svg.innerHTML = '';
+  svg.setAttribute('viewBox', `0 0 ${SW} ${SH}`);
+
+  function el(tag)       { return document.createElementNS('http://www.w3.org/2000/svg', tag); }
+  function attr(e, obj)  { Object.entries(obj).forEach(([k,v]) => e.setAttribute(k,v)); return e; }
+
+  // Clip paths
+  const defs = el('defs');
+  defs.innerHTML = `
+    <clipPath id="tl-above"><rect x="${PL}" y="${PT}" width="${CW}" height="${thY-PT}"/></clipPath>
+    <clipPath id="tl-below"><rect x="${PL}" y="${thY}" width="${CW}" height="${PT+CH-thY}"/></clipPath>
+    <clipPath id="tl-chart"><rect x="${PL}" y="${PT}" width="${CW}" height="${CH}"/></clipPath>`;
+  svg.appendChild(defs);
+
+  const pts = probs.map((p, i) => ({ x: px(i), y: py(p) }));
+
+  // Smooth bezier path through all points
+  function buildD(pts) {
+    let d = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const mx = ((pts[i].x + pts[i+1].x) / 2).toFixed(1);
+      const my = ((pts[i].y + pts[i+1].y) / 2).toFixed(1);
+      d += ` Q ${pts[i].x.toFixed(1)} ${pts[i].y.toFixed(1)} ${mx} ${my}`;
+    }
+    d += ` L ${pts[pts.length-1].x.toFixed(1)} ${pts[pts.length-1].y.toFixed(1)}`;
+    return d;
+  }
+  const lineD = buildD(pts);
+  const areaD = `${lineD} L ${pts[N-1].x.toFixed(1)} ${thY} L ${pts[0].x.toFixed(1)} ${thY} Z`;
+
+  // Y-axis labels
+  [['100%', PT], ['50%', thY], ['0%', PT+CH]].forEach(([lbl, yy]) => {
+    const t = attr(el('text'), { x: PL-5, y: yy+3.5, 'text-anchor':'end', 'font-size':'9',
+      'font-family':'JetBrains Mono,monospace', fill:'#94a3b8' });
+    t.textContent = lbl;
+    svg.appendChild(t);
+  });
+
+  // Grid lines
+  [PT, thY, PT+CH].forEach(yy => {
+    const l = attr(el('line'), { x1:PL, x2:PL+CW, y1:yy, y2:yy,
+      stroke: yy === thY ? '#e2e8f0' : '#f1f5f9', 'stroke-width':'1' });
+    if (yy === thY) l.setAttribute('stroke-dasharray', '4 3');
+    svg.appendChild(l);
+  });
+
+  // Filled regions
+  const fillA = attr(el('path'), { d:areaD, fill:'rgba(16,185,129,0.12)', 'clip-path':'url(#tl-above)' });
+  const fillB = attr(el('path'), { d:areaD, fill:'rgba(239,68,68,0.10)',  'clip-path':'url(#tl-below)' });
+  fillA.style.opacity = fillB.style.opacity = '0';
+  svg.appendChild(fillA); svg.appendChild(fillB);
+
+  // Line
+  const line = attr(el('path'), { d:lineD, fill:'none', stroke:'#a0203a',
+    'stroke-width':'1.8', 'stroke-linecap':'round', 'clip-path':'url(#tl-chart)' });
+  svg.appendChild(line);
+  const lineLen = line.getTotalLength();
+  line.style.strokeDasharray = lineLen;
+  line.style.strokeDashoffset = lineLen;
+
+  // Turning point
+  let tpIdx = 1;
+  for (let i = 2; i < N; i++)
+    if (Math.abs(probs[i] - probs[i-1]) > Math.abs(probs[tpIdx] - probs[tpIdx-1])) tpIdx = i;
+  const tpDelta = probs[tpIdx] - probs[tpIdx-1];
+  const tpX = pts[tpIdx].x, tpY = pts[tpIdx].y;
+
+  const tpVline = attr(el('line'), { x1:tpX, x2:tpX, y1:PT, y2:PT+CH,
+    stroke:'#f59e0b', 'stroke-width':'1.5', 'stroke-dasharray':'3 2' });
+  svg.appendChild(tpVline);
+
+  const tpDot = attr(el('circle'), { cx:tpX, cy:tpY, r:'5',
+    fill:'#f59e0b', stroke:'#fff', 'stroke-width':'2' });
+  svg.appendChild(tpDot);
+
+  const tpLbl = attr(el('text'), { y: PT-5, 'font-size':'9.5',
+    'font-family':'JetBrains Mono,monospace', fill:'#92400e', 'font-weight':'600' });
+  const tpSign = tpDelta > 0 ? '+' : '';
+  tpLbl.textContent = `"${tokens[tpIdx]}"  ${tpSign}${(tpDelta*100).toFixed(1)}%`;
+  const tpAnchor = tpX > PL + CW * 0.65 ? 'end' : 'start';
+  tpLbl.setAttribute('x', tpAnchor === 'end' ? tpX - 7 : tpX + 7);
+  tpLbl.setAttribute('text-anchor', tpAnchor);
+  svg.appendChild(tpLbl);
+
+  // Hover elements
+  const hLine = attr(el('line'), { x1:0, x2:0, y1:PT, y2:PT+CH,
+    stroke:'#94a3b8', 'stroke-width':'1', 'stroke-dasharray':'3 2' });
+  hLine.style.display = 'none';
+  const hDot = attr(el('circle'), { r:'4', fill:'#a0203a', stroke:'#fff', 'stroke-width':'2' });
+  hDot.style.display = 'none';
+  const hTxt = attr(el('text'), { y: PT-5, 'font-size':'10',
+    'font-family':'JetBrains Mono,monospace', fill:'#1e293b', 'font-weight':'500' });
+  hTxt.style.display = 'none';
+  svg.appendChild(hLine); svg.appendChild(hDot); svg.appendChild(hTxt);
+
+  // Transparent overlay for hover
+  const overlay = attr(el('rect'), { x:PL, y:PT, width:CW, height:CH, fill:'transparent' });
+  overlay.addEventListener('mousemove', evt => {
+    const r = svg.getBoundingClientRect();
+    const t = Math.max(0, Math.min(1, ((evt.clientX - r.left) * (SW / r.width) - PL) / CW));
+    const i = Math.min(Math.round(t * (N-1)), N-1);
+    const dotX = pts[i].x, dotY = pts[i].y;
+    hLine.setAttribute('x1', dotX); hLine.setAttribute('x2', dotX);
+    hDot.setAttribute('cx', dotX);  hDot.setAttribute('cy', dotY);
+    const labelX = Math.max(PL+45, Math.min(PL+CW-45, dotX));
+    hTxt.setAttribute('x', labelX);
+    hTxt.setAttribute('text-anchor', dotX < PL + CW/2 ? 'start' : 'end');
+    hTxt.textContent = `"${tokens[i]}"  ${(probs[i]*100).toFixed(1)}%`;
+    hLine.style.display = hDot.style.display = hTxt.style.display = '';
+  });
+  overlay.addEventListener('mouseleave', () => {
+    hLine.style.display = hDot.style.display = hTxt.style.display = 'none';
+  });
+  svg.appendChild(overlay);
+
+  // Animate
+  const dur = Math.min(N * 6, 1000);
+  setTimeout(() => {
+    line.style.transition = `stroke-dashoffset ${dur}ms ease`;
+    line.style.strokeDashoffset = '0';
+  }, 50);
+  setTimeout(() => {
+    fillA.style.transition = fillB.style.transition = 'opacity 0.4s';
+    fillA.style.opacity = fillB.style.opacity = '1';
+  }, dur + 120);
+
+  // Turning point info bar
+  const tpDir   = tpDelta > 0 ? 'pozitife döndü' : 'negatife döndü';
+  const tpInfo  = document.getElementById('tp-info');
+  tpInfo.textContent = `Dönüm noktası: "${tokens[tpIdx]}" — model bu tokenden sonra ${tpDir} (${tpDelta > 0 ? '+' : ''}${(tpDelta*100).toFixed(1)}%)`;
+  tpInfo.style.display = '';
+
+  // Highlight turning point token chip
+  document.querySelectorAll('.token.turning').forEach(s => s.classList.remove('turning'));
+  const tpSpan = document.querySelector(`.token[data-tidx="${tpIdx}"]`);
+  if (tpSpan) tpSpan.classList.add('turning');
+
+  card.classList.remove('visible');
+  void card.offsetWidth;
+  card.classList.add('visible');
+  setTimeout(() => card.scrollIntoView({ behavior:'smooth', block:'nearest' }), 80);
+}
+
+document.getElementById('review-input').addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') analyze();
+});
 </script>
 </body>
 </html>

@@ -26,7 +26,7 @@ from src.model import SentimentLSTM
 
 # ── Paths ─────────────────────────────────────────────────────────────────
 VOCAB_PATH      = os.path.join(REPO_ROOT, 'data', 'vocab.pkl')
-CHECKPOINT_PATH = os.path.join(REPO_ROOT, 'checkpoints', 'best_model.pt')
+CHECKPOINT_PATH = os.path.join(REPO_ROOT, 'data', 'checkpoints', 'best_model.pt')
 TEMPLATES_DIR   = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 
 # ── Load model at startup ─────────────────────────────────────────────────
@@ -130,6 +130,34 @@ def analyze():
         'scores'     : scores,
         'oov'        : oov,
     })
+
+
+@app.route('/timeline', methods=['POST'])
+def timeline():
+    data = request.get_json(force=True)
+    text = (data.get('text') or '').strip()
+    if not text:
+        return jsonify({'error': 'No text provided'}), 400
+
+    try:
+        tokens_list = tokenizer.tokenize(text)
+        n           = min(len(tokens_list), 500)
+        tokens_list = tokens_list[:n]
+
+        encoded = tokenizer.encode(text)
+        x       = torch.tensor([encoded], dtype=torch.long).to(device)
+
+        with torch.no_grad():
+            embed     = model.embedding(x)          # (1, 500, embed_dim)
+            output, _ = model.lstm(embed)            # (1, 500, hidden_size)
+            hidden    = output[0, 500 - n:]          # (n, hidden_size)
+            if model.batch_norm is not None:
+                hidden = model.batch_norm(hidden)
+            probs = torch.sigmoid(model.fc(hidden)).squeeze(-1).cpu().tolist()
+
+        return jsonify({'tokens': tokens_list, 'probs': probs})
+    except Exception as exc:
+        return jsonify({'error': str(exc)}), 500
 
 
 if __name__ == '__main__':
