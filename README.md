@@ -6,7 +6,7 @@ A binary sentiment classifier for IMDb movie reviews built from scratch using a 
 
 ## Project Overview
 
-This project implements a sentiment analysis system that classifies IMDb movie reviews as **positive** or **negative**. The core model is a single-layer LSTM with a trainable word embedding layer, trained end-to-end using binary cross-entropy loss. All preprocessing logic (text cleaning, vocabulary building, sequence encoding) is implemented from scratch in `src/preprocessing.py` and is fully unit-tested and property-tested.
+This project implements a sentiment analysis system that classifies IMDb movie reviews as **positive** or **negative**. The core model is a three-layer stacked LSTM with Batch Normalisation, trained end-to-end using binary cross-entropy loss with logits. All preprocessing logic (text cleaning, vocabulary building, sequence encoding) is implemented from scratch in `src/preprocessing.py` and is fully unit-tested and property-tested.
 
 Key design choices:
 - **Framework**: PyTorch — explicit training loop for full visibility and debuggability
@@ -41,9 +41,8 @@ Run the notebooks in order. Each notebook saves artifacts consumed by the next.
 |---|----------|-------------|
 | 01 | `notebooks/01_data_exploration.ipynb` | Load the CSV, verify shape and class balance, compute length statistics, render sample reviews, plot histograms and word clouds |
 | 02 | `notebooks/02_preprocessing.ipynb` | Split data 80/10/10, clean text, build vocabulary from training split, encode all splits to fixed-length integer sequences, save `vocab.pkl` and `.npy` files |
-| 03 | `notebooks/03_model_building.ipynb` | Define `SentimentLSTM`, print model summary, run a smoke-test forward pass with dummy input |
-| 04 | `notebooks/04_training.ipynb` | Train with early stopping, plot loss/accuracy curves, run a 2-layer experiment, compare baseline vs. experiment |
-| 05 | `notebooks/05_evaluation.ipynb` | Load best checkpoint, evaluate on test set, display confusion matrix and classification report, predict on custom reviews |
+| 03 | `notebooks/03_model_building.ipynb` | Define the final `SentimentLSTM` (3-layer + BatchNorm), print model summary, run smoke-test forward pass, preview experiment variants |
+| 04 | `notebooks/04_training_and_evaluation.ipynb` | Train with early stopping, plot loss/accuracy curves, load best checkpoint, evaluate on test set, display confusion matrix, classification report, and custom review predictions |
 
 ---
 
@@ -137,30 +136,35 @@ All dependencies are pinned in `requirements.txt`:
 Input (batch_size, 500)  — integer token indices
     │
     ▼
-nn.Embedding(vocab_size=20000, embedding_dim=128, padding_idx=0)
+nn.Embedding(vocab_size=20002, embedding_dim=128, padding_idx=0)
     │
     ▼
-nn.LSTM(input_size=128, hidden_size=64, num_layers=1, batch_first=True)
-    │  (take final hidden state h_n[-1])
+nn.LSTM(input_size=128, hidden_size=256, num_layers=3,
+        batch_first=True, dropout=0.4)
+    │  (take final hidden state h_n[-1], shape: batch×256)
     ▼
-nn.Dropout(p=0.5)
+nn.BatchNorm1d(256)
     │
     ▼
-nn.Linear(64, 1)  +  torch.sigmoid
+nn.Dropout(p=0.4)
     │
     ▼
-Output (batch_size, 1)  — probability in [0, 1]
+nn.Linear(256, 1)  — raw logit
+    │
+    ▼
+Output (batch_size, 1)  — logit; apply torch.sigmoid() for probability
 ```
 
-Threshold: `>= 0.5` → positive, `< 0.5` → negative.
+Threshold: `sigmoid(logit) >= 0.5` → positive, `< 0.5` → negative.
 
 ---
 
 ## Results
 
-Results are filled in after training runs in notebook 04 and 05.
+Test accuracy is filled in after notebook 05 runs in Colab.
 
 | Configuration | Val Accuracy | Test Accuracy |
 |---------------|-------------|---------------|
-| Baseline (1-layer LSTM, hidden=64) | TBD | TBD |
-| Experiment (2-layer LSTM, hidden=128) | TBD | TBD |
+| Baseline (1-layer LSTM, hidden=64, dropout=0.5) | ~87% | TBD |
+| Experiment (2-layer LSTM, hidden=128, dropout=0.5) | ~89.56% | TBD |
+| **Final (3-layer LSTM + BatchNorm, hidden=256, dropout=0.4)** | **90.52%** | **TBD** |
